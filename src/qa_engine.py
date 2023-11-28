@@ -7,7 +7,7 @@ CONTEXT = "Mysql server is running on host 192.168.7.11"
 class QaEngine(BaseModel):
     prompt_provider: PromptProvider = PromptProvider(context=CONTEXT)
 
-    def get_answer(self, question: str) -> str:
+    def get_answer(self, question: str, history: str) -> str:
         messages = []
         prompt = self.prompt_provider.get_prompt(question)
         messages.append({"role": "user", "content": prompt})
@@ -15,4 +15,5 @@ class QaEngine(BaseModel):
         steps = self.prompt_provider.get_steps()
         rtn_text = rtn_items[0]
         steps.add_step_from_str(rtn_text)
+        rtn_text = rtn_text.replace("\n", "<p>")
         return rtn_text

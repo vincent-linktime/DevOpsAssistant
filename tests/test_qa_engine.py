@@ -30,8 +30,8 @@ class TestQaEngine(unittest.TestCase):
         qa_engine = QaEngine()
         steps = qa_engine.prompt_provider.get_steps()
         self.assertEqual(steps.get_steps_length(), 0)
-        rtn_text = qa_engine.get_answer("error message")
-        self.assertEqual(rtn_text, step_str)
+        rtn_text = qa_engine.get_answer("error message", "")
+        self.assertEqual(rtn_text, step_str.replace("\n", "<p>"))
         self.assertEqual(steps.get_steps_length(), 1)
-        
+        self.assertEqual(steps.toText(), "Step 1: Login into Mysql and list all the processes.\nCommand:\nmysql -u root -p{your password}\nResult:\n")
 
