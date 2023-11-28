@@ -14,16 +14,7 @@ response = {
         "role": "assistant"
       }
     }
-  ],
-  "created": 1677664795,
-  "id": "chatcmpl-7QyqpwdfhqwajicIEznoc6Q47XAyW",
-  "model": "gpt-3.5-turbo-0613",
-  "object": "chat.completion",
-  "usage": {
-    "completion_tokens": 17,
-    "prompt_tokens": 57,
-    "total_tokens": 74
-  }
+  ]
 }
 
 class TestUtils(unittest.TestCase):
