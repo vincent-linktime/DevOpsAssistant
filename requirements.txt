@@ -1,0 +1,4 @@
+gradio==3.44.0
+langchain==0.0.327
+openai==0.28.0
+pydantic==v2.4.1
