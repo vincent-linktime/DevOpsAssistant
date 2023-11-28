@@ -28,6 +28,9 @@ class Steps(BaseModel):
     def get_steps(self):
         return self.step_list
 
+    def get_steps_length(self):
+        return len(self.step_list)
+
     def str2step(self, step_str: str):
         suggestion = ""
         commands = []

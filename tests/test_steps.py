@@ -67,6 +67,13 @@ class TestSteps(unittest.TestCase):
         # Check if the Steps object has the Step object
         self.assertIn(step, steps.get_steps())
 
+    def test_get_steps_length(self):
+        steps = Steps()
+        self.assertEqual(steps.get_steps_length(), 0)
+        step = Step(suggestion="suggestion", commands=["commands"], result="result")
+        steps.add_step(step)
+        self.assertEqual(steps.get_steps_length(), 1)
+
     def test_str2step(self):
         steps = Steps()
         step = steps.str2step(step_str)

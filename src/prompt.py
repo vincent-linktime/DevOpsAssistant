@@ -1,9 +1,11 @@
 import json
+from pydantic import BaseModel
+from steps import Steps
 
 BASE_PROMPT = """
 I am a DevOps engineer and you are my AI assistant. You are helping me to diagnose	
-system issues and find the root cause and resolve it. The error message I have seen is:
-'''{error_message}'''
+system issues and find the root cause and resolve it. 
+{abstract}
 
 The system context:
 {context}
@@ -17,8 +19,9 @@ to get into the host running Mysql, then we need to run 'mysql -u root -p'  to l
 An example of a diagnose step is:
 Next Step: Login into Mysql and list all the processes. 
 Command: 
-mysql -u root -p{your password}
+mysql -u root -p[your-password]
 show processlist
+Instruction: Tell me that the results of "show processlist" command.
 
 After I show you the result I got from this action, you give me the next diagnose step until we find the root cause and resolve it. 
 
@@ -27,3 +30,28 @@ Previous diagnose steps we have done:
 
 Based on the history of previous diagnose steps, now what is the next diagnose step?
 """
+
+class PromptProvider(BaseModel):
+    context: str
+    steps: Steps = Steps()
+
+    def set_context(self, context: str):
+        self.context = context
+
+    def get_steps(self):
+        return self.steps
+
+    def get_prompt(self, input_message: str):
+        # If Steps list is not empty then input_message is the result for the last command
+        # Otherwise input_message is the error message we see the first time
+        step_history = "None"
+        abstract = f"The error message I see is: {input_message}"
+        step_length = self.steps.get_steps_length()
+        if step_length > 0:
+            abstract = f"After ran the last command in Step {step_length-1}, \
+                 {input_message}"
+            self.steps.add_result_to_last_step(input_message)
+            step_history = self.steps.toText()
+        prompt = BASE_PROMPT.format(abstract=abstract, \
+            context=self.context, step_history=step_history)   
+        return prompt
