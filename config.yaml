@@ -1,0 +1,4 @@
+logging:
+  log_dir: "logs"
+  log_file: "app.log"
+  log_level: "DEBUG"

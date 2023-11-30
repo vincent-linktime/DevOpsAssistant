@@ -1,7 +1,9 @@
-import os, sys, unittest, openai
+import os, sys, unittest, openai, shutil
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
+
 from src.qa_engine import QaEngine
+from src.logger import DevOpsAILogger
 from unittest.mock import patch, MagicMock
 
 step_str ="""
@@ -24,6 +26,13 @@ response = {
 }
 
 class TestQaEngine(unittest.TestCase):
+    def setUp(self):
+        pass
+    
+    def tearDown(self):
+        if os.path.exists("logs"):
+          shutil.rmtree("logs")
+
     @patch("openai.ChatCompletion.create")
     def test_get_answer(self, mock_openai_chatcompletion):
         mock_openai_chatcompletion.return_value = response
