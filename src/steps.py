@@ -52,10 +52,12 @@ class Steps(BaseModel):
         step_num = 0
         for step in self.step_list:
             step_num += 1
+            rtn_str += "AI Assistant:\n"
             rtn_str += f"Step {step_num}: " + step.suggestion + "\n"
             rtn_str += "Command:\n"
             for command in step.commands:
                 rtn_str += command + "\n"
-            rtn_str += "Result:"
+            rtn_str += "Result seen by DevOps Engineer after ran the above commands:\n"
             rtn_str += step.result + "\n"
+            rtn_str += "-----------\n"
         return rtn_str

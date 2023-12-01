@@ -82,4 +82,9 @@ class TestSteps(unittest.TestCase):
     def test_toText(self):
         steps = Steps()
         steps.add_step_from_str(step_str)
-        self.assertEqual(steps.toText(), "Step 1: Login into Mysql and list all the processes.\nCommand:\nmysql -u root -p{your password}\nResult:\n")
+        expected_str = "AI Assistant:\n" + \
+            "Step 1: Login into Mysql and list all the processes.\n" + \
+            "Command:\nmysql -u root -p{your password}\n" + \
+            "Result seen by DevOps Engineer after ran the above commands:\n" + \
+            "\n-----------\n"
+        self.assertEqual(steps.toText(), expected_str)
