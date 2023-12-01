@@ -9,6 +9,10 @@ Command:
 mysql -u root -p{your password}
 """
 
+expected_str = "\nNext Step: Login into Mysql and list all the processes.\n" + \
+    "Command:\nmysql -u root -p{your password}\n"
+
+
 # Test the Steps class
 class TestSteps(unittest.TestCase):
     def test_add_step(self):
@@ -17,7 +21,7 @@ class TestSteps(unittest.TestCase):
         steps = Steps()
         
         # Create a Step object
-        step = Step(suggestion="suggestion", commands=["commands"], result="result")
+        step = Step(suggestion="suggestion", result="result")
         
         # Add the Step object to the Steps object
         steps.add_step(step)
@@ -29,11 +33,11 @@ class TestSteps(unittest.TestCase):
         # each step has a different suggestion so that we can check
         # if the first step is removed.
         for i in range(0, STEP_HISTORY_LENGTH + 1):
-            step = Step(suggestion=str(i), commands=["commands"], result="result")
+            step = Step(suggestion=str(i), result="result")
             steps.add_step(step)
             self.assertIn(step, steps.get_steps())
             if i == STEP_HISTORY_LENGTH:
-                self.assertNotIn(Step(suggestion="0", commands=["commands"], result="result"),\
+                self.assertNotIn(Step(suggestion="0", result="result"),\
                      steps.get_steps())
 
     def test_add_step_from_str(self):
@@ -45,7 +49,7 @@ class TestSteps(unittest.TestCase):
 
         rtn_step = steps.get_steps()[0]
         # Check if the Steps object has the Step object
-        self.assertIn(rtn_step.suggestion, "Next Step: Login into Mysql and list all the processes.")
+        self.assertIn(rtn_step.suggestion, expected_str)
     
     def test_add_result_to_last_step(self):
         result = "problem solved"
@@ -54,12 +58,21 @@ class TestSteps(unittest.TestCase):
         steps.add_result_to_last_step(result)
         self.assertEqual(steps.get_steps()[0].result, result)
 
+    def test_clean_steps(self):
+        steps = Steps()
+        self.assertEqual(steps.get_steps_length(), 0)
+        step = Step(suggestion="suggestion", result="result")
+        steps.add_step(step)
+        self.assertEqual(steps.get_steps_length(), 1)
+        steps.clean_steps()
+        self.assertEqual(steps.get_steps_length(), 0)
+
     def test_get_steps(self):
         # Create a Steps object
         steps = Steps()
         
         # Create a Step object
-        step = Step(suggestion="suggestion", commands=["commands"], result="result")
+        step = Step(suggestion="suggestion", result="result")
         
         # Add the Step object to the Steps object
         steps.add_step(step)
@@ -70,21 +83,20 @@ class TestSteps(unittest.TestCase):
     def test_get_steps_length(self):
         steps = Steps()
         self.assertEqual(steps.get_steps_length(), 0)
-        step = Step(suggestion="suggestion", commands=["commands"], result="result")
+        step = Step(suggestion="suggestion", result="result")
         steps.add_step(step)
         self.assertEqual(steps.get_steps_length(), 1)
-
-    def test_str2step(self):
-        steps = Steps()
-        step = steps.str2step(step_str)
-        self.assertEqual(step.suggestion, "Login into Mysql and list all the processes.")
     
-    def test_toText(self):
+    def test_lastStep2Str(self):
+        steps = Steps()
+        self.assertEqual(steps.lastStep2Str(), "")
+        steps.add_step_from_str(step_str)
+        self.assertEqual(steps.lastStep2Str(), expected_str)
+
+    def test_steps2messages(self):
         steps = Steps()
         steps.add_step_from_str(step_str)
-        expected_str = "AI Assistant:\n" + \
-            "Step 1: Login into Mysql and list all the processes.\n" + \
-            "Command:\nmysql -u root -p{your password}\n" + \
-            "Result seen by DevOps Engineer after ran the above commands:\n" + \
-            "\n-----------\n"
-        self.assertEqual(steps.toText(), expected_str)
+        messages = steps.steps2messages()
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(messages[0]["content"], expected_str) 
+        self.assertEqual(messages[0]["role"], "assistant")

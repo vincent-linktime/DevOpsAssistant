@@ -2,7 +2,6 @@ from pydantic import BaseModel
 
 class Step(BaseModel):
     suggestion: str
-    commands: list[str]
     result: str
     
 STEP_HISTORY_LENGTH = 10
@@ -18,12 +17,15 @@ class Steps(BaseModel):
         if len(self.step_list) > STEP_HISTORY_LENGTH:
             self.step_list.pop(0)
 
-    def add_step_from_str(self, step_str: str):
-        step = self.str2step(step_str)
+    def add_step_from_str(self, suggestion: str):
+        step = Step(suggestion=suggestion, result="")
         self.add_step(step)
 
     def add_result_to_last_step(self, result: str):
         self.step_list[-1].result = result
+
+    def clean_steps(self):
+        self.step_list = []
 
     def get_steps(self):
         return self.step_list
@@ -31,33 +33,20 @@ class Steps(BaseModel):
     def get_steps_length(self):
         return len(self.step_list)
 
-    def str2step(self, step_str: str):
-        suggestion = ""
-        commands = []
-        step_str = step_str.strip()
-        lines = step_str.split("\n")
-        commands_start = False
-        for line in lines:
-            if line.startswith("Next Step:"):
-                suggestion = line.replace("Next Step:", "").strip()
-            elif line.startswith("Command:"):
-                commands_start = True
-                continue
-            elif commands_start:
-                commands.append(line.strip())
-        return Step(suggestion=suggestion, commands=commands, result="")
-
-    def toText(self):
-        rtn_str = ""
-        step_num = 0
-        for step in self.step_list:
-            step_num += 1
-            rtn_str += "AI Assistant:\n"
-            rtn_str += f"Step {step_num}: " + step.suggestion + "\n"
-            rtn_str += "Command:\n"
-            for command in step.commands:
-                rtn_str += command + "\n"
-            rtn_str += "Result seen by DevOps Engineer after ran the above commands:\n"
-            rtn_str += step.result + "\n"
-            rtn_str += "-----------\n"
+    def lastStep2Str(self):
+        if len(self.step_list) == 0:
+            return ""
+        suggestion = self.step_list[-1].suggestion
+        result = self.step_list[-1].result
+        rtn_str = suggestion
+        if result != "":
+            rtn_str = f"{suggestion}\n{result}"
         return rtn_str
+
+    def steps2messages(self):
+        messages = []
+        for step in self.step_list:
+            messages.append({"role": "assistant", "content": step.suggestion})
+            if step.result != "":
+                messages.append({"role": "user", "content": step.result})
+        return messages

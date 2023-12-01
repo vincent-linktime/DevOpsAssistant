@@ -10,26 +10,26 @@ Command:
 mysql -u root -p{your password}
 """
 
-class TestPromptProvider(unittest.TestCase):
-    def test_get_prompt(self):
-        original_problem = "error message"
-        step_history = "None"
-        expected_prompt = BASE_PROMPT.format(original_problem=original_problem, \
-            step_history="None")            
+expected_str = "\nNext Step: Login into Mysql and list all the processes.\n" + \
+    "Command:\nmysql -u root -p{your password}\n"
 
-        prompt_provider = PromptProvider(original_problem=original_problem)
-        prompt = prompt_provider.get_prompt("none")
-        self.assertEqual(prompt, expected_prompt)
+class TestPromptProvider(unittest.TestCase):
+    def test_get_messages(self):
+        original_problem = "error message"
+        expected_prompt = BASE_PROMPT.format(original_problem=original_problem)            
+
+        prompt_provider = PromptProvider(original_problem="")
+        messages = prompt_provider.get_messages(original_problem)
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(messages[0]["role"], "user")
 
         # Test with a non-empty step history
-        steps = prompt_provider.get_steps()
-        steps.add_step_from_str(step_str)
         input_message = "none"
-        expected_step_history = "Step 1: Login into Mysql and list all the processes.\n" + \
-            "Command:\nmysql -u root -p{your password}\n" + \
-            "Result seen by DevOps Engineer after ran the above commands:\n" + input_message
-        expected_prompt = BASE_PROMPT.format(original_problem=original_problem, \
-            step_history=expected_step_history)
-        prompt = prompt_provider.get_prompt(input_message)
-        self.assertEqual(prompt, expected_prompt)
-
+        prompt_provider.add_step_from_str(input_message)
+        messages = prompt_provider.get_messages(input_message)
+        self.assertEqual(len(messages), 3)
+        self.assertEqual(messages[0]["role"], "user")
+        self.assertEqual(messages[1]['role'], "assistant")   
+        self.assertEqual(messages[1]['content'], input_message)
+        self.assertEqual(messages[2]['role'], "user")
+        self.assertEqual(messages[2]['content'], input_message)
