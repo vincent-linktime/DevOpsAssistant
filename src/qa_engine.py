@@ -1,7 +1,7 @@
 from prompt import PromptProvider
 from utils import openai_completion
 from logger import DevOpsAILogger
-import yaml
+import json, yaml
 
 CONTEXT = "Mysql server is running on host 192.168.7.11"
 
@@ -19,16 +19,28 @@ class QaEngine:
 
     def get_prompt_provider(self):
         return self.prompt_provider
+
+    def parse_return_from_openai(self, rtn_text):
+        parsed_text = ""
+        found = False
+        for line in rtn_text.split("\n"):
+            if line.startswith("Next Step") or line.startswith(FINAL_RTN) > 0:
+                found = True
+            if found:
+                parsed_text += line + "\n"
+        return parsed_text
         
     def get_answer(self, question: str, history: str) -> str:
         messages = self.prompt_provider.get_messages(question)        
         rtn_items = openai_completion(messages, 1)
-    
-        rtn_text = rtn_items[0]
-        if rtn_text == FINAL_RTN:
+        parsed_text = self.parse_return_from_openai(rtn_items[0])
+        if parsed_text.strip() == FINAL_RTN:
             self.prompt_provider.clean_steps()
         else:
-            self.prompt_provider.add_step_from_str(rtn_text)
+            if parsed_text.strip() != "":
+                self.prompt_provider.add_step_from_str(parsed_text)
+            else:
+                parsed_text = "Sorry, I did not get it, please explain it more specifically."
         self.logger.info(f"last step: \n {self.prompt_provider.lastStep2Str()}")
-        rtn_text = rtn_text.replace("\n", "<p>")
-        return rtn_text
+        parsed_text = parsed_text.replace("\n", "<p>")
+        return parsed_text
