@@ -63,7 +63,7 @@ class TestSteps(unittest.TestCase):
         self.assertEqual(steps.get_steps_length(), 0)
         step = Step(suggestion="suggestion", result="result")
         steps.add_step(step)
-        self.assertEqual(steps.get_steps_length(), 1)
+        self.assertEqual(steps.get_steps_length(), 1)        
         steps.clean_steps()
         self.assertEqual(steps.get_steps_length(), 0)
 
@@ -92,6 +92,9 @@ class TestSteps(unittest.TestCase):
         self.assertEqual(steps.lastStep2Str(), "")
         steps.add_step_from_str(step_str)
         self.assertEqual(steps.lastStep2Str(), expected_str)
+        result = "problem solved"
+        steps.add_result_to_last_step(result)
+        self.assertEqual(steps.lastStep2Str(), f"{expected_str}Feedback from user:{result}")
 
     def test_steps2messages(self):
         steps = Steps()

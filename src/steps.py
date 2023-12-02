@@ -40,7 +40,7 @@ class Steps(BaseModel):
         result = self.step_list[-1].result
         rtn_str = suggestion
         if result != "":
-            rtn_str = f"{suggestion}\n{result}"
+            rtn_str = f"{suggestion}Feedback from user:{result}"
         return rtn_str
 
     def steps2messages(self):

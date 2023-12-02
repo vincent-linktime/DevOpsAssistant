@@ -31,7 +31,9 @@ class QaEngine:
         return parsed_text
         
     def get_answer(self, question: str, history: str) -> str:
-        messages = self.prompt_provider.get_messages(question)        
+        messages = self.prompt_provider.get_messages(question)
+        lastStep2Str = self.prompt_provider.lastStep2Str()
+        self.logger.info(f"last step before call openai: \n {lastStep2Str}")
         rtn_items = openai_completion(messages, 1)
         parsed_text = self.parse_return_from_openai(rtn_items[0])
         if parsed_text.strip() == FINAL_RTN:
@@ -41,6 +43,7 @@ class QaEngine:
                 self.prompt_provider.add_step_from_str(parsed_text)
             else:
                 parsed_text = "Sorry, I did not get it, please explain it more specifically."
-        self.logger.info(f"last step: \n {self.prompt_provider.lastStep2Str()}")
+        lastStep2Str = self.prompt_provider.lastStep2Str()
+        self.logger.info(f"last step after call openai: \n {lastStep2Str}")
         parsed_text = parsed_text.replace("\n", "<p>")
         return parsed_text
