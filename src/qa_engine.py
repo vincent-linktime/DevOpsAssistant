@@ -3,8 +3,6 @@ from utils import openai_completion
 from logger import DevOpsAILogger
 import json, yaml
 
-CONTEXT = "Mysql server is running on host 192.168.7.11"
-
 with open("config.yaml", "r") as yaml_file:
     config = yaml.safe_load(yaml_file)
 
@@ -46,7 +44,7 @@ class QaEngine:
         self.logger.info(f"last step before call openai: \n {lastStep2Str}")
         rtn_items = openai_completion(messages, 1)
         parsed_text = self.parse_return_from_openai(rtn_items[0])
-        if parsed_text.strip() == FINAL_STR:
+        if parsed_text.strip().startswith(FINAL_STR):
             self.prompt_provider.clean_steps()
         else:
             if parsed_text.strip() != "":

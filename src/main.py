@@ -11,4 +11,8 @@ if config["language"] == "cn":
     title = "GPT支持的DevOps智能助手"
     
 qa_engine = QaEngine()
-gr.ChatInterface(qa_engine.get_answer, title=title).queue().launch(share=True)
+
+gr.ChatInterface(
+    qa_engine.get_answer, 
+    chatbot=gr.Chatbot(height=600),
+    title=title).queue().launch(share=True)

@@ -2,13 +2,13 @@ language: "en"
 
 en_labels:
   next_step_str: "Next Step"
-  final_str: "We solved the problem!"
+  final_str: "We solved the problem"
   feedback_str: "Feedback from user"
   error_text: "Sorry, I did not get it, please explain it more specifically."
 
 cn_labels:
   next_step_str: "下一步"
-  final_str: "我们解决了问题！"
+  final_str: "我们解决了问题"
   feedback_str: "用户反馈的结果"
   error_text: "对不起，我没有明白你的问题，请具体说明。"
 
