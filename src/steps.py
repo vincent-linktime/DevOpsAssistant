@@ -1,4 +1,14 @@
 from pydantic import BaseModel
+import yaml
+
+with open("config.yaml", "r") as yaml_file:
+    config = yaml.safe_load(yaml_file)
+
+FEEDBACK_STR = ""
+if config["language"] == "en":
+    FEEDBACK_STR = config["en_labels"]["feedback_str"]
+else:
+    FEEDBACK_STR = config["cn_labels"]["feedback_str"]
 
 class Step(BaseModel):
     suggestion: str
@@ -40,7 +50,7 @@ class Steps(BaseModel):
         result = self.step_list[-1].result
         rtn_str = suggestion
         if result != "":
-            rtn_str = f"{suggestion}Feedback from user:{result}"
+            rtn_str = f"{suggestion}{FEEDBACK_STR}:{result}"
         return rtn_str
 
     def steps2messages(self):

@@ -1,7 +1,7 @@
-import os, sys, unittest
+import os, sys, unittest, yaml
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
-from src.steps import Step, Steps, STEP_HISTORY_LENGTH
+from src.steps import Step, Steps, STEP_HISTORY_LENGTH, FEEDBACK_STR
 
 step_str ="""
 Next Step: Login into Mysql and list all the processes.
@@ -12,6 +12,27 @@ mysql -u root -p{your password}
 expected_str = "\nNext Step: Login into Mysql and list all the processes.\n" + \
     "Command:\nmysql -u root -p{your password}\n"
 
+
+step_cn_str ="""
+下一步: 登录到Mysql并列出所有进程。
+命令:
+mysql -u root -p{your password}
+"""
+
+ecpected_cn_str = "\n下一步: 登录到Mysql并列出所有进程。\n" + \
+    "命令:\nmysql -u root -p{your password}\n"
+
+with open("config.yaml", "r") as yaml_file:
+    config = yaml.safe_load(yaml_file)
+    
+STEP_STR = ""
+EXPECTED_STR = ""
+if config["language"] == "en":  
+    STEP_STR = step_str
+    EXPECTED_STR = expected_str
+else:
+    STEP_STR = step_cn_str
+    EXPECTED_STR = ecpected_cn_str
 
 # Test the Steps class
 class TestSteps(unittest.TestCase):
@@ -45,16 +66,16 @@ class TestSteps(unittest.TestCase):
         steps = Steps()
             
         # Add the Step object to the Steps object
-        steps.add_step_from_str(step_str)
+        steps.add_step_from_str(STEP_STR)
 
         rtn_step = steps.get_steps()[0]
         # Check if the Steps object has the Step object
-        self.assertIn(rtn_step.suggestion, expected_str)
+        self.assertIn(rtn_step.suggestion, EXPECTED_STR)
     
     def test_add_result_to_last_step(self):
         result = "problem solved"
         steps = Steps()
-        steps.add_step_from_str(step_str)
+        steps.add_step_from_str(STEP_STR)
         steps.add_result_to_last_step(result)
         self.assertEqual(steps.get_steps()[0].result, result)
 
@@ -90,16 +111,16 @@ class TestSteps(unittest.TestCase):
     def test_lastStep2Str(self):
         steps = Steps()
         self.assertEqual(steps.lastStep2Str(), "")
-        steps.add_step_from_str(step_str)
-        self.assertEqual(steps.lastStep2Str(), expected_str)
+        steps.add_step_from_str(STEP_STR)
+        self.assertEqual(steps.lastStep2Str(), EXPECTED_STR)
         result = "problem solved"
         steps.add_result_to_last_step(result)
-        self.assertEqual(steps.lastStep2Str(), f"{expected_str}Feedback from user:{result}")
+        self.assertEqual(steps.lastStep2Str(), f"{EXPECTED_STR}{FEEDBACK_STR}:{result}")
 
     def test_steps2messages(self):
         steps = Steps()
-        steps.add_step_from_str(step_str)
+        steps.add_step_from_str(STEP_STR)
         messages = steps.steps2messages()
         self.assertEqual(len(messages), 1)
-        self.assertEqual(messages[0]["content"], expected_str) 
+        self.assertEqual(messages[0]["content"], EXPECTED_STR) 
         self.assertEqual(messages[0]["role"], "assistant")
